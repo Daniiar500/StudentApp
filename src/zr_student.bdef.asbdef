@@ -1,0 +1,57 @@
+managed implementation in class zbp_r_student unique;
+//strict ( 2 );
+
+with draft;
+
+define behavior for ZR_STUDENT //alias <alias_name>
+persistent table zda_a_stdnt
+draft table zda_d_stdnt
+
+lock master total etag lastchangedat
+authorization master ( instance )
+etag master locallastchangedat
+{
+  create;
+  update;
+  delete;
+  field ( numbering : managed, readonly ) Id;
+  field ( readonly ) GenderDesc;
+
+  association _Academicres { create; }
+
+  action ( features : instance ) setAdmitted result [1] $self;
+  validation validateAge on save { field Age; create; }
+  determination UpdateCourseDuration on save { field Course; }
+
+  mapping for zda_a_stdnt
+    {
+      Id             = id;
+      FirstName      = firstname;
+      LastName       = lastname;
+      Age            = age;
+      Course         = course;
+      CourseDuration = courseduration;
+      Status         = studentstatus;
+      Gender         = gender;
+      Dob            = dob;
+      lastchangedat = lastchangedat;
+      locallastchangedat = locallastchangedat;
+    }
+
+}
+
+
+
+define behavior for ZR_ACADEMIC_RESULT //alias <alias_name>
+persistent table zda_a_stdnt_ar
+draft table zda_d_stdnt_ar
+
+lock dependent by _Student
+authorization dependent by _Student
+etag master locallastchangedat
+{
+  update;
+  delete;
+  field ( readonly ) Id, CourseDesc, SemDesc, SemresDesc;
+  association _Student;
+}
